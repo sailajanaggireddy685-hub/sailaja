@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Notes Sharing Platform</title>
+  <meta name="description" content="Log in to Student Notes Sharing Platform to explore and share study notes. Pull the lamp cord to switch between dark and light.">
+  <link rel="stylesheet" href="login.css">
+  <script>
+    // Same theme key as the main page, applied before paint
+    try { document.documentElement.dataset.theme = localStorage.getItem('notenest-theme') || 'light'; } catch (e) {}
+  </script>
+</head>
+<body>
+  <main class="room">
+    <section class="lamp-side" aria-label="Lamp">
+      <div class="lamp" id="lamp">
+        <div class="lamp-rod"></div>
+        <svg class="lamp-shade" viewBox="0 0 220 130" aria-hidden="true">
+          <defs>
+            <linearGradient id="shadeGrad" x1="0" x2="1">
+              <stop offset="0" class="shade-a"/>
+              <stop offset="1" class="shade-b"/>
+            </linearGradient>
+          </defs>
+          <rect x="98" y="0" width="24" height="18" rx="4" class="lamp-cap"/>
+          <path d="M70 18 H150 L210 112 Q110 128 10 112 Z" fill="url(#shadeGrad)"/>
+          <ellipse cx="110" cy="114" rx="100" ry="12" class="shade-rim"/>
+          <circle cx="110" cy="118" r="20" class="bulb"/>
+        </svg>
+        <div class="beam" aria-hidden="true"></div>
+
+        <button class="cord" id="cord" type="button" aria-label="Pull the cord to switch the light" title="Pull me (or press L)">
+          <span class="cord-line"></span>
+          <span class="cord-bead"></span>
+        </button>
+      </div>
+      <p class="hint" id="hint">Pull the cord 👆</p>
+    </section>
+
+    <section class="login-side">
+      <div class="login-card" id="card">
+        <a class="brand" href="index.html">
+          <span class="brand-mark" aria-hidden="true">📚</span>
+          <span>Student<b>Notes</b> <span class="brand-sub">Sharing Platform</span></span>
+        </a>
+
+        <div class="tabs" role="tablist">
+          <button class="tab active" id="tabLogin" role="tab" aria-selected="true" type="button">Log in</button>
+          <button class="tab" id="tabSignup" role="tab" aria-selected="false" type="button">Sign up</button>
+          <span class="tab-slider" aria-hidden="true"></span>
+        </div>
+
+        <h1 id="formTitle">Welcome back 👋</h1>
+        <p class="sub" id="formSub">Log in to open your notes, papers and lab records.</p>
+
+        <form id="authForm" novalidate>
+          <label class="field hidden" id="nameField">
+            <span>Full name</span>
+            <input type="text" id="name" autocomplete="name" placeholder="e.g. Satya Kumar" maxlength="40">
+          </label>
+          <label class="field">
+            <span>Email</span>
+            <input type="email" id="email" autocomplete="email" placeholder="you@college.edu" required>
+          </label>
+          <label class="field">
+            <span>Password</span>
+            <div class="pw-wrap">
+              <input type="password" id="password" autocomplete="current-password" placeholder="At least 6 characters" required minlength="6">
+              <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password">👁</button>
+            </div>
+          </label>
+
+          <div class="row">
+            <label class="check"><input type="checkbox" id="remember" checked> Remember me</label>
+            <button type="button" class="link-btn" id="forgot">Forgot password?</button>
+          </div>
+
+          <p class="msg hidden" id="msg" role="alert"></p>
+
+          <button class="btn primary" type="submit" id="submitBtn">Log in</button>
+          <button class="btn ghost" type="button" id="guestBtn">Continue as guest</button>
+        </form>
+
+        <p class="switch" id="switchText">New here? <button type="button" class="link-btn" id="switchBtn">Create an account</button></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="login.js"></script>
+</body>
+</html>

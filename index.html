@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Notes Sharing Platform</title>
+  <meta name="description" content="A vibrant study library to organize notes, papers, labs and subject materials in a colorful digital space.">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    // Apply the saved theme before the page paints to avoid a flash
+    try { document.documentElement.dataset.theme = localStorage.getItem('notenest-theme') || 'light'; } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="nav">
+    <div class="container nav-inner">
+      <a href="#top" class="logo">
+        <span class="logo-mark" aria-hidden="true">📚</span>
+        <span>Student<b>Notes</b> Sharing Platform</span>
+      </a>
+      <nav class="nav-links">
+        <a class="nav-secondary" href="#library">Library</a>
+        <a class="nav-secondary" href="#subjects">Subjects</a>
+        <a class="btn ghost small nav-login" href="login.html">Log in</a>
+        <button class="btn small primary" id="openUpload">+ Upload</button>
+        <button class="icon-btn" id="themeToggle" title="Switch theme" aria-label="Switch theme">🌙</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero container">
+      <div class="hero-text">
+        <span class="pill">🎓 For students, by students</span>
+        <h1>All your study material, <span class="grad">in one place.</span></h1>
+        <p class="lead">Upload notes, previous question papers, lab records and subject materials. Organize them by subject and semester, then find any file in seconds.</p>
+        <div class="hero-actions">
+          <button class="btn primary" id="heroUpload">Upload a file</button>
+          <button class="btn ghost" id="loadSamples">Load sample files</button>
+        </div>
+      </div>
+      <div class="stats" id="stats" aria-live="polite"></div>
+    </section>
+
+    <section id="subjects" class="container section">
+      <div class="section-head">
+        <h2>Browse by subject</h2>
+        <p class="muted">Click a subject to see only its files.</p>
+      </div>
+      <div class="subject-grid" id="subjectGrid"></div>
+    </section>
+
+    <section id="library" class="container section">
+      <div class="section-head">
+        <h2>Library</h2>
+        <p class="muted" id="resultCount"></p>
+      </div>
+
+      <div class="toolbar card">
+        <div class="search-box">
+          <span aria-hidden="true">🔍</span>
+          <input type="search" id="search" placeholder="Search title, subject, tags or description" autocomplete="off">
+          <kbd>/</kbd>
+        </div>
+        <div class="type-chips" id="typeChips" role="group" aria-label="Filter by type"></div>
+        <div class="filter-row">
+          <label>Subject
+            <select id="filterSubject"><option value="">All subjects</option></select>
+          </label>
+          <label>Semester
+            <select id="filterSemester"><option value="">All semesters</option></select>
+          </label>
+          <label>Sort by
+            <select id="sortBy">
+              <option value="new">Newest first</option>
+              <option value="old">Oldest first</option>
+              <option value="az">Title A to Z</option>
+              <option value="downloads">Most downloaded</option>
+              <option value="size">Largest first</option>
+            </select>
+          </label>
+          <label class="check">
+            <input type="checkbox" id="favOnly"> ⭐ Favourites only
+          </label>
+          <button class="btn ghost small" id="resetFilters">Reset</button>
+        </div>
+      </div>
+
+      <div class="file-grid" id="fileGrid"></div>
+
+      <div class="empty card hidden" id="emptyState">
+        <div class="empty-icon" aria-hidden="true">🗂️</div>
+        <h3 id="emptyTitle">No files yet</h3>
+        <p class="muted" id="emptyText">Upload your first file or load the sample files to try things out.</p>
+      </div>
+
+      <div class="backup card">
+        <div>
+          <h3>Share with friends</h3>
+          <p class="muted">Files are saved in this browser only. Export your library as a backup file and send it to a classmate, who can import it into their NoteNest.</p>
+        </div>
+        <div class="backup-actions">
+          <button class="btn ghost" id="exportBtn">⬇ Export library</button>
+          <label class="btn ghost" for="importInput">⬆ Import library</label>
+          <input type="file" id="importInput" accept=".json,application/json" hidden>
+          <button class="btn danger-ghost" id="clearAll">Delete everything</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">Cloud sharing requires Supabase configuration. See README.md for setup instructions.</div>
+  </footer>
+
+  <!-- Upload / edit dialog -->
+  <dialog id="uploadDialog" class="modal">
+    <form id="uploadForm" method="dialog" novalidate>
+      <div class="modal-head">
+        <h2 id="uploadTitle">Upload a file</h2>
+        <button type="button" class="icon-btn" data-close aria-label="Close">✕</button>
+      </div>
+
+      <div class="dropzone" id="dropzone" tabindex="0">
+        <input type="file" id="fileInput" hidden>
+        <div class="drop-icon" aria-hidden="true">📄</div>
+        <p><b>Drag and drop</b> a file here, or <span class="link">browse</span></p>
+        <p class="muted small">PDF, images, text, Word, PowerPoint or ZIP. Up to 25 MB.</p>
+        <p class="file-picked hidden" id="filePicked"></p>
+      </div>
+
+      <div class="form-grid">
+        <label class="full">Title *
+          <input type="text" id="fTitle" maxlength="100" placeholder="e.g. Unit 3: Normalization notes" required>
+        </label>
+        <label>Subject *
+          <input type="text" id="fSubject" list="subjectList" maxlength="60" placeholder="e.g. DBMS" required>
+          <datalist id="subjectList"></datalist>
+        </label>
+        <label>Semester *
+          <select id="fSemester" required></select>
+        </label>
+        <label>Type *
+          <select id="fType" required></select>
+        </label>
+        <label>Uploaded by
+          <input type="text" id="fAuthor" maxlength="40" placeholder="Your name">
+        </label>
+        <label class="full">Tags <span class="muted small">(comma separated)</span>
+          <input type="text" id="fTags" maxlength="120" placeholder="unit 3, important, 2024">
+        </label>
+        <label class="full">Description
+          <textarea id="fDesc" rows="3" maxlength="400" placeholder="What is inside this file?"></textarea>
+        </label>
+      </div>
+      <p class="form-error hidden" id="formError" role="alert"></p>
+
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" data-close>Cancel</button>
+        <button type="submit" class="btn primary" id="saveBtn">Save file</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Preview dialog -->
+  <dialog id="previewDialog" class="modal wide">
+    <div class="modal-head">
+      <div>
+        <h2 id="pvTitle"></h2>
+        <p class="muted small" id="pvMeta"></p>
+      </div>
+      <button type="button" class="icon-btn" data-close aria-label="Close">✕</button>
+    </div>
+    <div class="preview-body" id="pvBody"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn ghost" data-close>Close</button>
+      <button type="button" class="btn primary" id="pvDownload">⬇ Download</button>
+    </div>
+  </dialog>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <script src="config.js"></script>
+  <script src="db.js"></script>
+  <script src="sample.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
